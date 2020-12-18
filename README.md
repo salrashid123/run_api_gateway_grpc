@@ -150,11 +150,15 @@ Create the gateway
 
 ```bash
 gcloud beta api-gateway gateways create grpc-gateway-1 --location us-central-1 --api grpc-api-1 --api-config=grpc-config-1
+
 export GATEWAY_HOST=`gcloud beta api-gateway gateways describe grpc-gateway-1 --location us-central1 --format='value(defaultHostname)'`
 echo $GATEWAY_HOST
 ```
 
-
+if you updated a config, you need to update the gateway to use it
+`
+gcloud alpha api-gateway gateways update grpc-gateway-1   --api=grpc-api-1 --api-config=grpc-config-2 --location=us-central1
+`
 ## Finally invoke the API Gateway using the client
 
 ```bash

@@ -14,6 +14,7 @@ backend:
   rules:
     - selector: "*"
       address: grpcs://apiserver-grpc-6w42z6vi3q-uc.a.run.app
+      jwt_audience: https://apiserver-grpc-6w42z6vi3q-uc.a.run.app
 authentication:
   providers:
   - id: google_id_token
