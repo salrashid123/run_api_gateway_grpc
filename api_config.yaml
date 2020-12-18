@@ -1,0 +1,27 @@
+type: google.api.Service
+config_version: 3
+name: grpc-api-1-2nyb3czfq48od.apigateway.mineral-minutia-820.cloud.goog
+title: Cloud Endpoints + Cloud Run gRPC
+apis:
+- name: echo.EchoServer
+usage:
+  rules:
+  - selector: echo.EchoServer.SayHello
+    allow_unregistered_calls: true
+  - selector: echo.EchoServer.SayHelloStream
+    allow_unregistered_calls: true
+backend:
+  rules:
+    - selector: "*"
+      address: grpcs://apiserver-grpc-6w42z6vi3q-uc.a.run.app
+authentication:
+  providers:
+  - id: google_id_token
+    authorization_url: ''
+    audiences: 'grpcs://grpc-gateway-1'
+    issuer: 'https://accounts.google.com'
+    jwks_uri: 'https://www.googleapis.com/oauth2/v1/certs'
+  rules:
+  - selector: "*"
+    requirements:
+      - provider_id: google_id_token
