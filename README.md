@@ -133,13 +133,15 @@ export PROTO_FILE=src/echo/echo.proto.pb
 echo $MANAGED_SERVICE
 echo $AUDIENCE
 echo $ADDRESS
-
+ 
 envsubst < "api_config.yaml.tmpl" > "api_config.yaml"
 
-curl -X POST -H "Content-type: application/json"  -H "Authorization: Bearer $(gcloud auth print-access-token)" \
-    https://apigateway.googleapis.com/v1beta/projects/${PROJECT_ID}/locations/global/apis/${API_ID}/configs?api_config_id=${API_CONFIG_ID} \
-       -d '{"gateway_service_account":"gateway-sa@'$PROJECT_ID'.iam.gserviceaccount.com", "managed_service_configs":[{"path":"api_config.yaml","contents":"'$(base64 -i -w0 ${SOURCE_FILE})'"} ], "grpc_services": {"file_descriptor_set": {"path":"src/echo/echo.proto.pb","contents":"'$(base64 -i -w0 ${PROTO_FILE})'"} } }'
 
+gcloud beta api-gateway api-configs create $API_CONFIG_ID --api=grpc-api-1 \
+     --grpc-files=api_config.yaml,src/echo/echo.proto.pb  \
+     --backend-auth-service-account=gateway-sa@$PROJECT_ID.iam.gserviceaccount.com 
+
+```
 # wait about a 3 or 4 mins until its ACTIVE
 $  gcloud beta api-gateway api-configs list
 CONFIG_ID      API_ID      DISPLAY_NAME   SERVICE_CONFIG_ID            STATE   CREATE_TIME
@@ -156,9 +158,11 @@ echo $GATEWAY_HOST
 ```
 
 if you updated a config, you need to update the gateway to use it
-`
+
+```bash
 gcloud alpha api-gateway gateways update grpc-gateway-1   --api=grpc-api-1 --api-config=grpc-config-2 --location=us-central1
-`
+```
+
 ## Finally invoke the API Gateway using the client
 
 ```bash

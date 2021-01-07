@@ -45,11 +45,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("unable to create TokenSource: %v", err)
 	}
-	tok, err := idTokenSource.Token()
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("IdToken %s\n", tok.AccessToken)
+	// tok, err := idTokenSource.Token()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// log.Printf("IdToken %s\n", tok.AccessToken)
 
 	var conn *grpc.ClientConn
 
