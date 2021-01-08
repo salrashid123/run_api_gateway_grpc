@@ -13,6 +13,7 @@ import (
 
 	"echo"
 
+	gcemeta "cloud.google.com/go/compute/metadata"
 	"golang.org/x/net/context"
 	"google.golang.org/api/idtoken"
 	"google.golang.org/grpc"
@@ -28,6 +29,9 @@ var (
 	serverKey      = flag.String("key", "server_key.pem", "Server TLS key")
 	targetAudience = flag.String("targetAudience", "", "OIDC audience to check")
 	validateToken  = flag.Bool("validateToken", false, "validateToken field")
+	useMetadata    = flag.Bool("useMetadata", true, "Acquire the instanceID from metatadata")
+
+	instanceID = ""
 )
 
 const ()
@@ -85,8 +89,8 @@ func (s *server) SayHelloStream(in *echo.EchoRequest, stream echo.EchoServer_Say
 		log.Fatalf("grpc.SendHeader(%v, %v) = %v, want %v", ctx, respmdheader, err, nil)
 	}
 
-	stream.Send(&echo.EchoReply{Message: "Msg1 " + in.Name})
-	stream.Send(&echo.EchoReply{Message: "Msg2 " + in.Name})
+	stream.Send(&echo.EchoReply{Message: "Msg1 " + in.Name + " from instanceID " + instanceID})
+	stream.Send(&echo.EchoReply{Message: "Msg2 " + in.Name + " from instanceID " + instanceID})
 
 	var respmdfooter = metadata.MD{
 		"streamtrailerkey": []string{"val"},
@@ -118,7 +122,7 @@ func (s *server) SayHello(ctx context.Context, in *echo.EchoRequest) (*echo.Echo
 		}
 	*/
 	h := os.Getenv("K_REVISION")
-	return &echo.EchoReply{Message: "Hello " + in.Name + "  from K_REVISION " + h}, nil
+	return &echo.EchoReply{Message: "Hello " + in.Name + "  from K_REVISION " + h + " from instanceID " + instanceID}, nil
 }
 
 func main() {
@@ -149,6 +153,13 @@ func main() {
 	s := grpc.NewServer(sopts...)
 
 	echo.RegisterEchoServerServer(s, &server{})
+
+	if *useMetadata {
+		instanceID, err = gcemeta.InstanceID()
+		if err != nil {
+			log.Fatalf("Failed to get instanceID credentials %v", err)
+		}
+	}
 
 	log.Println("Starting gRPC server on port :8080")
 

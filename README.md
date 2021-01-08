@@ -53,7 +53,7 @@ gcloud run deploy apiserver-grpc \
 export RUN_URL=`gcloud run services describe apiserver-grpc --format='value(status.url)'`
 echo $RUN_URL
 
-gcloud run deploy apiserver-grpc \
+gcloud beta run deploy apiserver-grpc  --min-instances 3   --max-instances 3 \
   --image gcr.io/$PROJECT_ID/apiserver-grpc --no-allow-unauthenticated \
   --args="--validateToken=true,--targetAudience=$RUN_URL"  -q  
 ```
@@ -188,4 +188,24 @@ authentication:
   - selector: "*"
     requirements:
       - provider_id: google_id_token
+```
+
+
+You should also notice the responses come back from different instances over one gRPC channel to the gateway.
+That means the LB distributes each RPC to different Run backends.
+
+```log
+$ go run src/grpc_client.go --address $GATEWAY_HOST:443    --audience=grpcs://grpc-gateway-1    --servername $GATEWAY_HOST    --serviceAccount=../api-client-sa.json
+2021/01/08 10:55:35 RPC Response: 0 message:"Hello unary RPC msg   from K_REVISION apiserver-grpc-00010-kow from instanceID 00bf4bf02d01cf6178748e7d6b841411cafaef92c7fbc4e156aa5d745b718afb3a73cb3bfbacc8f6a7a2a35af203456aca9caafa38f125727c6bb23d"
+2021/01/08 10:55:36 RPC Response: 1 message:"Hello unary RPC msg   from K_REVISION apiserver-grpc-00010-kow from instanceID 00bf4bf02d3db44d5ea1d5796fc83a709cec8d3e560a16cf625a3f85b6a563ff2dbc5dbe7454157f18b63a4164fb6d2fe059fad36148cd446c8f53c951"
+2021/01/08 10:55:37 RPC Response: 2 message:"Hello unary RPC msg   from K_REVISION apiserver-grpc-00010-kow from instanceID 00bf4bf02d01cf6178748e7d6b841411cafaef92c7fbc4e156aa5d745b718afb3a73cb3bfbacc8f6a7a2a35af203456aca9caafa38f125727c6bb23d"
+2021/01/08 10:55:38 RPC Response: 3 message:"Hello unary RPC msg   from K_REVISION apiserver-grpc-00010-kow from instanceID 00bf4bf02daaf8cec9ffe8412aed9dc8728a6e878e18f0e71b9576d959eb37b81ca0497a024602c3c6debf03d5b64ebc8210237a5fae57cf2192"
+2021/01/08 10:55:39 RPC Response: 4 message:"Hello unary RPC msg   from K_REVISION apiserver-grpc-00010-kow from instanceID 00bf4bf02d01cf6178748e7d6b841411cafaef92c7fbc4e156aa5d745b718afb3a73cb3bfbacc8f6a7a2a35af203456aca9caafa38f125727c6bb23d"
+2021/01/08 10:55:40 RPC Response: 5 message:"Hello unary RPC msg   from K_REVISION apiserver-grpc-00010-kow from instanceID 00bf4bf02d3db44d5ea1d5796fc83a709cec8d3e560a16cf625a3f85b6a563ff2dbc5dbe7454157f18b63a4164fb6d2fe059fad36148cd446c8f53c951"
+2021/01/08 10:55:41 RPC Response: 6 message:"Hello unary RPC msg   from K_REVISION apiserver-grpc-00010-kow from instanceID 00bf4bf02d01cf6178748e7d6b841411cafaef92c7fbc4e156aa5d745b718afb3a73cb3bfbacc8f6a7a2a35af203456aca9caafa38f125727c6bb23d"
+2021/01/08 10:55:42 RPC Response: 7 message:"Hello unary RPC msg   from K_REVISION apiserver-grpc-00010-kow from instanceID 00bf4bf02daaf8cec9ffe8412aed9dc8728a6e878e18f0e71b9576d959eb37b81ca0497a024602c3c6debf03d5b64ebc8210237a5fae57cf2192"
+2021/01/08 10:55:44 RPC Response: 8 message:"Hello unary RPC msg   from K_REVISION apiserver-grpc-00010-kow from instanceID 00bf4bf02d01cf6178748e7d6b841411cafaef92c7fbc4e156aa5d745b718afb3a73cb3bfbacc8f6a7a2a35af203456aca9caafa38f125727c6bb23d"
+2021/01/08 10:55:45 RPC Response: 9 message:"Hello unary RPC msg   from K_REVISION apiserver-grpc-00010-kow from instanceID 00bf4bf02d01cf6178748e7d6b841411cafaef92c7fbc4e156aa5d745b718afb3a73cb3bfbacc8f6a7a2a35af203456aca9caafa38f125727c6bb23d"
+2021/01/08 10:55:45 Message: Msg1 Stream RPC msg from instanceID 00bf4bf02d3db44d5ea1d5796fc83a709cec8d3e560a16cf625a3f85b6a563ff2dbc5dbe7454157f18b63a4164fb6d2fe059fad36148cd446c8f53c951
+2021/01/08 10:55:45 Message: Msg2 Stream RPC msg from instanceID 00bf4bf02d3db44d5ea1d5796fc83a709cec8d3e560a16cf625a3f85b6a563ff2dbc5dbe7454157f18b63a4164fb6d2fe059fad36148cd446c8f53c951
 ```

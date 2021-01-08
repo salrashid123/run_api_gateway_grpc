@@ -93,7 +93,7 @@ func main() {
 
 	var header, trailer metadata.MD
 
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 10; i++ {
 		r, err := c.SayHello(ctx, &pb.EchoRequest{Name: "unary RPC msg "}, grpc.Header(&header), grpc.Trailer(&trailer))
 		if err != nil {
 			log.Fatalf("could not greet: %v", err)
