@@ -142,7 +142,10 @@ gcloud beta api-gateway api-configs create $API_CONFIG_ID --api=grpc-api-1 \
      --backend-auth-service-account=gateway-sa@$PROJECT_ID.iam.gserviceaccount.com 
 
 ```
-# wait about a 3 or 4 mins until its ACTIVE
+
+wait about a 3 or 4 mins until its ACTIVE
+
+```bash
 $  gcloud beta api-gateway api-configs list
 CONFIG_ID      API_ID      DISPLAY_NAME   SERVICE_CONFIG_ID            STATE   CREATE_TIME
 grpc-config-1  grpc-api-1  grpc-config-1  grpc-config-1-05zcbixuegzsp  ACTIVE  2020-12-18T15:38:30
