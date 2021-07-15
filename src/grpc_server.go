@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	"echo"
+	"github.com/salrashid123/run_api_gateway_grpc/echo"
 
 	gcemeta "cloud.google.com/go/compute/metadata"
 	"golang.org/x/net/context"

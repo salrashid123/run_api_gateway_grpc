@@ -3,12 +3,13 @@ package main
 import (
 	"crypto/tls"
 	"crypto/x509"
-	pb "echo"
 	"flag"
 	"io"
 	"io/ioutil"
 	"log"
 	"time"
+
+	pb "github.com/salrashid123/run_api_gateway_grpc/echo"
 
 	"golang.org/x/net/context"
 	"google.golang.org/api/idtoken"

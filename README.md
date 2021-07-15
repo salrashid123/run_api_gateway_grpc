@@ -30,6 +30,7 @@ Optionally recompile proto file:
 /usr/local/bin/protoc -I src/ \
  --include_imports --include_source_info \
  --descriptor_set_out=src/echo/echo.proto.pb \
+ --go_opt=paths=source_relative \
  --go_out=plugins=grpc:src/ src/echo/echo.proto
 ```
 
